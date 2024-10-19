@@ -244,6 +244,8 @@ export default function Home() {
         arrayOne: [],
         arrayTwo: [],
     });
+    const [numberArr, setNumberArr] = useState<number[]>([]);
+    const [isEndcode, setIsEndcode] = useState<boolean>(true);
 
     const handleTableMatrix = (isEncode: boolean = false): number[] => {
         setKey(key.trim());
@@ -298,6 +300,8 @@ export default function Home() {
     const handleClickEndCode = () => {
         tableMatrix.arrayOne = [];
         tableMatrix.arrayTwo = [];
+        const numberArrVariable: number[] = [];
+        setIsEndcode(true);
 
         // lấy ra mảng number key
         const arrayKeyNumber = handleTableMatrix(true);
@@ -315,14 +319,18 @@ export default function Home() {
         let cipherTextString = '';
         tableMatrix.arrayOne.forEach((item, index: number) => {
             const indexCipherText = (Number(item) + Number(tableMatrix.arrayTwo[index])) % lowercaseCharacters.length;
+            numberArrVariable.push(indexCipherText);
             cipherTextString += lowercaseCharacters[indexCipherText];
         });
+        setNumberArr(numberArrVariable);
         setCipherText(cipherTextString);
     };
 
     const handleDecode = () => {
         tableMatrix.arrayOne = [];
         tableMatrix.arrayTwo = [];
+        setIsEndcode(false);
+        const numberArrVariable: number[] = [];
 
         const arrayKeyNumber = handleTableMatrix(false);
 
@@ -338,13 +346,15 @@ export default function Home() {
         setTableMatrix((prev) => ({ ...prev, arrayTwo: tableMatrix.arrayTwo }));
         let platinTextString = '';
         tableMatrix.arrayOne.forEach((item, index: number) => {
-            let indexCipherText = (Number(item) - Number(tableMatrix.arrayTwo[index])) % lowercaseCharacters.length;
-            if (indexCipherText < 0) {
-                indexCipherText = lowercaseCharacters.length + indexCipherText;
+            let indexPlainText = (Number(item) - Number(tableMatrix.arrayTwo[index])) % lowercaseCharacters.length;
+            if (indexPlainText < 0) {
+                indexPlainText = lowercaseCharacters.length + indexPlainText;
             }
-            platinTextString += lowercaseCharacters[indexCipherText];
+            platinTextString += lowercaseCharacters[indexPlainText];
+            numberArrVariable.push(indexPlainText);
         });
         setPlainText(platinTextString);
+        setNumberArr(numberArrVariable);
     };
 
     return (
@@ -354,41 +364,38 @@ export default function Home() {
                 <label htmlFor="plainText" className="block text-sm font-medium text-gray-900 mb-2">
                     Chuỗi PlainText
                 </label>
-                <input
+                <textarea
                     value={plainText}
                     onChange={(e) => setPlainText(e.target.value)}
-                    type="text"
                     id="plainText"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="Nhập plain text...."
                     required
-                />
+                ></textarea>
             </div>
             <div className="mt-3">
                 <label htmlFor="key" className="block text-sm font-medium text-gray-900 mb-2">
                     Key
                 </label>
-                <input
+                <textarea
                     value={key}
                     onChange={(e) => setKey(e.target.value)}
-                    type="text"
                     id="key"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="Nhập key...."
                     required
-                />
+                ></textarea>
             </div>
             <div className="mt-3">
                 <label htmlFor="result" className="block text-sm font-medium text-gray-900 mb-2">
                     CipherText
                 </label>
-                <input
+                <textarea
                     value={cipherText}
                     onChange={(e) => setCipherText(e.target.value)}
-                    type="text"
                     id="result"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                />
+                ></textarea>
             </div>
             <div className="flex gap-4">
                 <div className="mt-5">
@@ -405,6 +412,36 @@ export default function Home() {
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >
                         Giải mã
+                    </button>
+                </div>
+                <div className="mt-5">
+                    <button
+                        onClick={() => {
+                            setPlainText('');
+                        }}
+                        className="text-white bg-pink-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-pink-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                        Xóa plainText
+                    </button>
+                </div>
+                <div className="mt-5">
+                    <button
+                        onClick={() => {
+                            setKey('');
+                        }}
+                        className="text-white bg-pink-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-yellow-900 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                        Xóa Key
+                    </button>
+                </div>
+                <div className="mt-5">
+                    <button
+                        onClick={() => {
+                            setCipherText('');
+                        }}
+                        className="text-white bg-pink-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-900 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                        Xóa CipherText
                     </button>
                 </div>
             </div>
@@ -430,7 +467,18 @@ export default function Home() {
                                 >
                                     PlainText
                                 </th>
-                                <td className="px-6 py-4">{tableMatrix.arrayOne.join(',')}</td>
+                                <td className="px-6 py-4">
+                                    {isEndcode ? tableMatrix.arrayOne.join(',') : numberArr.join(',')}
+                                </td>
+                            </tr>
+                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <th
+                                    scope="row"
+                                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                    Key
+                                </th>
+                                <td className="px-6 py-4">{tableMatrix.arrayTwo.join(',')}</td>
                             </tr>
                             <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <th
@@ -439,7 +487,9 @@ export default function Home() {
                                 >
                                     CipherText
                                 </th>
-                                <td className="px-6 py-4">{tableMatrix.arrayTwo.join(',')}</td>
+                                <td className="px-6 py-4">
+                                    {!isEndcode ? tableMatrix.arrayOne.join(',') : numberArr.join(',')}
+                                </td>
                             </tr>
                         </tbody>
                         <caption className="text-center">
